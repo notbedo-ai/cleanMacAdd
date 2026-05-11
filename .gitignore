@@ -29,3 +29,6 @@ coverage/
 .cache/
 .parcel-cache/
 .eslintcache
+
+# Local-only docs
+docs/deployment.md
