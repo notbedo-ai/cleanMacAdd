@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-  Server,
+  Network,
   Play,
   ClipboardCopy,
   Check,
@@ -79,14 +79,14 @@ export function App() {
 
   return (
     <div className="min-h-full">
-      <header className="bg-white border-b border-slate-200">
+      <header className="bg-blue-50 border-b border-blue-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5 flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-900 text-white">
-            <Server className="w-5 h-5" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow-sm">
+            <Network className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-slate-900">cleanMac</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-xl font-semibold text-blue-900">cleanMac</h1>
+            <p className="text-sm text-blue-700/80">
               Cisco IOS · <span className="font-mono">sh int status</span> +{' '}
               <span className="font-mono">sh mac add</span> → Excel 붙여넣기용 표
             </p>
@@ -95,7 +95,7 @@ export function App() {
             <button
               type="button"
               onClick={handleLoadSample}
-              className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-1.5 text-sm text-blue-700 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
               title="예시 입력 채우기"
             >
               <Wand2 className="w-4 h-4" />
@@ -125,7 +125,7 @@ export function App() {
           <button
             type="button"
             onClick={handleConvert}
-            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
           >
             <Play className="w-4 h-4" />
             변환
@@ -134,7 +134,7 @@ export function App() {
             type="button"
             onClick={handleCopy}
             disabled={!canCopy}
-            className="inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors"
+            className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             title="결과를 TSV(헤더 없음)로 클립보드에 복사 → Excel에 바로 붙여넣기"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <ClipboardCopy className="w-4 h-4" />}
@@ -143,14 +143,14 @@ export function App() {
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 px-4 py-2 rounded-md text-sm font-medium text-slate-700 transition-colors"
+            className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <RotateCcw className="w-4 h-4" />
             초기화
           </button>
 
           {converted && (
-            <div className="ml-auto flex items-center gap-3 text-sm text-slate-600">
+            <div className="ml-auto flex items-center gap-3 text-sm text-blue-700">
               <StatBadge icon={<FileText className="w-3.5 h-3.5" />} label="포트" value={result.stats.portCount} />
               <StatBadge label="MAC" value={result.stats.macCount} />
               <StatBadge label="행" value={result.stats.rowCount} />
@@ -174,7 +174,7 @@ export function App() {
         )}
       </main>
 
-      <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-slate-400">
+      <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-blue-400">
         입력 데이터는 외부로 전송되지 않으며 브라우저 안에서만 처리됩니다.
       </footer>
     </div>
@@ -190,16 +190,16 @@ interface InputPanelProps {
 
 function InputPanel({ label, hint, value, onChange }: InputPanelProps) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-slate-200 bg-slate-50">
-        <div className="text-sm font-medium text-slate-900">{label}</div>
-        <div className="text-xs text-slate-500 mt-0.5">{hint}</div>
+    <div className="rounded-lg border border-blue-200 bg-white overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-blue-200 bg-blue-50">
+        <div className="text-sm font-medium text-blue-900">{label}</div>
+        <div className="text-xs text-blue-700/80 mt-0.5">{hint}</div>
       </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        className="w-full h-64 p-3 text-xs font-mono resize-y outline-none focus:bg-slate-50/50"
+        className="w-full h-64 p-3 text-xs font-mono resize-y outline-none focus:bg-blue-50/40 focus:ring-2 focus:ring-inset focus:ring-blue-500"
         placeholder="여기에 명령 결과를 붙여넣으세요…"
       />
     </div>
@@ -214,10 +214,10 @@ interface StatBadgeProps {
 
 function StatBadge({ icon, label, value }: StatBadgeProps) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 rounded text-xs">
+    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
       {icon}
-      <span className="font-medium text-slate-700">{label}</span>
-      <span className="font-mono text-slate-900">{value}</span>
+      <span className="font-medium">{label}</span>
+      <span className="font-mono text-blue-900">{value}</span>
     </span>
   );
 }
@@ -229,22 +229,22 @@ interface ResultTableProps {
 function ResultTable({ rows }: ResultTableProps) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500">
+      <div className="rounded-lg border border-dashed border-blue-300 p-10 text-center text-sm text-blue-500">
         변환할 데이터가 없습니다. 두 입력 영역을 채운 뒤 [변환] 버튼을 누르세요.
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-blue-200 bg-white overflow-hidden">
       <div className="max-h-[600px] overflow-auto">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 sticky top-0 z-10">
+          <thead className="bg-blue-100 sticky top-0 z-10">
             <tr>
               {COLUMNS.map((c) => (
                 <th
                   key={c}
-                  className="text-left font-medium text-slate-700 px-3 py-2 border-b border-slate-200 whitespace-nowrap"
+                  className="text-left font-semibold text-blue-900 px-3 py-2 border-b border-blue-200 whitespace-nowrap"
                 >
                   {c}
                 </th>
@@ -257,9 +257,9 @@ function ResultTable({ rows }: ResultTableProps) {
               return (
                 <tr
                   key={idx}
-                  className={isContinuation ? 'bg-slate-50/40' : 'border-t border-slate-100'}
+                  className={isContinuation ? 'bg-blue-50/40' : 'border-t border-blue-100 hover:bg-blue-50/30'}
                 >
-                  <td className="px-3 py-1.5 font-mono text-slate-900 whitespace-nowrap">{row.port}</td>
+                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.port}</td>
                   <td className="px-3 py-1.5 text-slate-700 whitespace-nowrap">
                     <StatusCell value={row.status} />
                   </td>
@@ -267,7 +267,7 @@ function ResultTable({ rows }: ResultTableProps) {
                   <td className="px-3 py-1.5 font-mono text-slate-700">{row.duplex}</td>
                   <td className="px-3 py-1.5 font-mono text-slate-700">{row.speed}</td>
                   <td className="px-3 py-1.5 font-mono text-slate-700 whitespace-nowrap">{row.type}</td>
-                  <td className="px-3 py-1.5 font-mono text-slate-900 whitespace-nowrap">{row.mac}</td>
+                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.mac}</td>
                 </tr>
               );
             })}

@@ -8,6 +8,6 @@ html, body, #root {
 
 body {
   margin: 0;
-  background-color: #f8fafc;
+  background-color: #eff6ff; /* blue-50 */
   color: #0f172a;
 }
