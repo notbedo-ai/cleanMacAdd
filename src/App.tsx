@@ -148,14 +148,14 @@ export function App() {
 
   return (
     <div className="min-h-full">
-      <header className="bg-blue-50 border-b border-blue-100">
+      <header className="bg-slate-900 border-b border-slate-800">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5 flex items-center gap-3">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow-sm">
             <Network className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-blue-900">cleanMac</h1>
-            <p className="text-sm text-blue-700/80">
+            <h1 className="text-xl font-semibold text-slate-100">cleanMac</h1>
+            <p className="text-sm text-slate-400">
               Cisco IOS · <span className="font-mono">sh int status</span> +{' '}
               <span className="font-mono">sh mac add</span> → Excel 붙여넣기용 표 (IP 매핑 지원)
             </p>
@@ -164,7 +164,7 @@ export function App() {
             <button
               type="button"
               onClick={handleLoadSample}
-              className="inline-flex items-center gap-1.5 text-sm text-blue-700 hover:text-blue-900 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-blue-300 px-3 py-1.5 rounded-md hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60"
               title="예시 입력 채우기"
             >
               <Wand2 className="w-4 h-4" />
@@ -206,7 +206,7 @@ export function App() {
           <button
             type="button"
             onClick={handleConvert}
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:ring-offset-2 focus:ring-offset-slate-950"
           >
             <Play className="w-4 h-4" />
             변환
@@ -215,23 +215,23 @@ export function App() {
             type="button"
             onClick={handleCopy}
             disabled={!canCopy}
-            className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 text-slate-100 hover:bg-slate-700 hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60"
             title="결과를 TSV(헤더 없음, 8컬럼)로 클립보드에 복사 → Excel에 바로 붙여넣기"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <ClipboardCopy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <ClipboardCopy className="w-4 h-4" />}
             {copied ? '복사됨' : '클립보드 복사'}
           </button>
           <button
             type="button"
             onClick={handleReset}
-            className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="inline-flex items-center gap-2 bg-slate-800 border border-slate-700 text-slate-100 hover:bg-slate-700 hover:border-slate-600 px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60"
           >
             <RotateCcw className="w-4 h-4" />
             초기화
           </button>
 
           {converted && (
-            <div className="ml-auto flex flex-wrap items-center gap-3 text-sm text-blue-700">
+            <div className="ml-auto flex flex-wrap items-center gap-3 text-sm text-slate-300">
               <StatBadge icon={<FileText className="w-3.5 h-3.5" />} label="포트" value={result.stats.portCount} />
               <StatBadge label="MAC" value={result.stats.macCount} />
               <StatBadge label="행" value={result.stats.rowCount} />
@@ -240,6 +240,7 @@ export function App() {
                   icon={<Link2 className="w-3.5 h-3.5" />}
                   label="IP 매핑"
                   valueLabel={`${result.stats.ipMappedCount}/${result.stats.macCount}`}
+                  accent
                 />
               )}
             </div>
@@ -247,7 +248,7 @@ export function App() {
         </div>
 
         {converted && result.warnings.length > 0 && (
-          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 space-y-1">
+          <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200 space-y-1">
             {result.warnings.map((w, idx) => (
               <div key={idx} className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -260,7 +261,7 @@ export function App() {
         {converted && <ResultTable rows={result.rows} />}
       </main>
 
-      <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-blue-400">
+      <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-slate-500">
         MAC·IP 매핑을 포함한 모든 입력은 외부로 전송되지 않으며 브라우저 안에서만 처리됩니다.
       </footer>
     </div>
@@ -274,11 +275,11 @@ interface ModeToggleProps {
 
 function ModeToggle({ mode, onChange }: ModeToggleProps) {
   const buttonBase =
-    'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500';
+    'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/60';
   const active = 'bg-blue-600 text-white';
-  const idle = 'text-blue-700 hover:bg-blue-50';
+  const idle = 'text-slate-300 hover:bg-slate-800 hover:text-slate-100';
   return (
-    <div className="inline-flex items-center gap-1 p-1 border border-blue-200 bg-white rounded-lg">
+    <div className="inline-flex items-center gap-1 p-1 border border-slate-700 bg-slate-900 rounded-lg">
       <button
         type="button"
         onClick={() => onChange('combined')}
@@ -316,12 +317,12 @@ function CombinedInputPanel({ value, onChange, split }: CombinedInputPanelProps)
 
   return (
     <div className="space-y-3">
-      <div className="rounded-lg border border-blue-200 bg-white overflow-hidden">
-        <div className="px-4 py-2.5 border-b border-blue-200 bg-blue-50">
-          <div className="text-sm font-medium text-blue-900">
+      <div className="rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+        <div className="px-4 py-2.5 border-b border-slate-700 bg-slate-800/60">
+          <div className="text-sm font-medium text-slate-100">
             ① + ② 통합 입력 (sh int status + sh mac add)
           </div>
-          <div className="text-xs text-blue-700/80 mt-0.5">
+          <div className="text-xs text-slate-400 mt-0.5">
             콘솔에서 두 명령 결과를 한 번에 복사한 텍스트를 그대로 붙여넣으세요. 자동으로 분리됩니다.
           </div>
         </div>
@@ -329,7 +330,7 @@ function CombinedInputPanel({ value, onChange, split }: CombinedInputPanelProps)
           value={value}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}
-          className="w-full h-72 p-3 text-xs font-mono resize-y outline-none focus:bg-blue-50/40 focus:ring-2 focus:ring-inset focus:ring-blue-500"
+          className="w-full h-72 p-3 text-xs font-mono resize-y outline-none bg-slate-900 text-slate-100 placeholder-slate-500 focus:bg-slate-800/40 focus:ring-2 focus:ring-inset focus:ring-blue-500/60"
           placeholder="여기에 sh int status + sh mac add 결과를 함께 붙여넣으세요…"
         />
       </div>
@@ -338,14 +339,14 @@ function CombinedInputPanel({ value, onChange, split }: CombinedInputPanelProps)
         <div
           className={`rounded-md border text-xs ${
             split.splitFound
-              ? 'border-blue-200 bg-blue-50/40'
-              : 'border-amber-200 bg-amber-50 text-amber-900'
+              ? 'border-slate-700 bg-slate-800/40'
+              : 'border-amber-500/40 bg-amber-500/10 text-amber-200'
           }`}
         >
-          <div className="flex items-center gap-2 px-3 py-2 text-blue-800">
+          <div className={`flex items-center gap-2 px-3 py-2 ${split.splitFound ? 'text-slate-300' : 'text-amber-200'}`}>
             {split.splitFound ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
                 <span>
                   분리 완료 — <span className="font-mono">sh int status</span> {intLines.length}줄,{' '}
                   <span className="font-mono">sh mac add</span> {macLines.length}줄
@@ -353,7 +354,7 @@ function CombinedInputPanel({ value, onChange, split }: CombinedInputPanelProps)
               </>
             ) : (
               <>
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-300" />
                 <span>
                   분리 마커를 찾지 못했습니다. 변환 시 전체 입력을 <span className="font-mono">sh int status</span>로
                   간주합니다.
@@ -375,12 +376,12 @@ function CombinedInputPanel({ value, onChange, split }: CombinedInputPanelProps)
 
 function PreviewBlock({ title, lines }: { title: string; lines: string[] }) {
   return (
-    <details className="rounded border border-blue-200 bg-white open:bg-blue-50/30">
-      <summary className="px-2 py-1 text-blue-800 font-medium cursor-pointer select-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
+    <details className="rounded border border-slate-700 bg-slate-900 open:bg-slate-800/40">
+      <summary className="px-2 py-1 text-slate-200 font-medium cursor-pointer select-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
         <ChevronRight className="w-3 h-3" />
         {title}
       </summary>
-      <pre className="px-3 pb-2 pt-1 text-[11px] font-mono text-slate-700 overflow-x-auto whitespace-pre">
+      <pre className="px-3 pb-2 pt-1 text-[11px] font-mono text-slate-300 overflow-x-auto whitespace-pre">
         {lines.length === 0 ? '(빈 영역)' : lines.join('\n')}
       </pre>
     </details>
@@ -396,16 +397,16 @@ interface InputPanelProps {
 
 function InputPanel({ label, hint, value, onChange }: InputPanelProps) {
   return (
-    <div className="rounded-lg border border-blue-200 bg-white overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-blue-200 bg-blue-50">
-        <div className="text-sm font-medium text-blue-900">{label}</div>
-        <div className="text-xs text-blue-700/80 mt-0.5">{hint}</div>
+    <div className="rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-slate-700 bg-slate-800/60">
+        <div className="text-sm font-medium text-slate-100">{label}</div>
+        <div className="text-xs text-slate-400 mt-0.5">{hint}</div>
       </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        className="w-full h-64 p-3 text-xs font-mono resize-y outline-none focus:bg-blue-50/40 focus:ring-2 focus:ring-inset focus:ring-blue-500"
+        className="w-full h-64 p-3 text-xs font-mono resize-y outline-none bg-slate-900 text-slate-100 placeholder-slate-500 focus:bg-slate-800/40 focus:ring-2 focus:ring-inset focus:ring-blue-500/60"
         placeholder="여기에 명령 결과를 붙여넣으세요…"
       />
     </div>
@@ -422,13 +423,13 @@ interface MacIpMappingPanelProps {
 // where the operator does not have IP information available.
 function MacIpMappingPanel({ value, onChange }: MacIpMappingPanelProps) {
   return (
-    <details className="rounded-lg border border-blue-200 bg-white overflow-hidden" open>
-      <summary className="px-4 py-2.5 border-b border-blue-200 bg-blue-50 cursor-pointer select-none [&::-webkit-details-marker]:hidden">
+    <details className="rounded-lg border border-slate-700 bg-slate-900 overflow-hidden" open>
+      <summary className="px-4 py-2.5 border-b border-slate-700 bg-slate-800/60 cursor-pointer select-none [&::-webkit-details-marker]:hidden">
         <div className="flex items-center gap-2">
-          <Link2 className="w-4 h-4 text-blue-700" />
-          <div className="text-sm font-medium text-blue-900">③ MAC↔IP 매핑 (선택)</div>
+          <Link2 className="w-4 h-4 text-blue-400" />
+          <div className="text-sm font-medium text-slate-100">③ MAC↔IP 매핑 (선택)</div>
         </div>
-        <div className="text-xs text-blue-700/80 mt-0.5">
+        <div className="text-xs text-slate-400 mt-0.5">
           타 팀에서 받은 MAC ↔ IP 매핑(Excel 두 열)을 그대로 붙여넣으세요. 결과 표에 IP 컬럼이 채워집니다. 비워두면 IP 컬럼은 빈 값으로 출력됩니다.
         </div>
       </summary>
@@ -436,7 +437,7 @@ function MacIpMappingPanel({ value, onChange }: MacIpMappingPanelProps) {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
-        className="w-full h-40 p-3 text-xs font-mono resize-y outline-none focus:bg-blue-50/40 focus:ring-2 focus:ring-inset focus:ring-blue-500"
+        className="w-full h-40 p-3 text-xs font-mono resize-y outline-none bg-slate-900 text-slate-100 placeholder-slate-500 focus:bg-slate-800/40 focus:ring-2 focus:ring-inset focus:ring-blue-500/60"
         placeholder={'aabb.cc00.0100\t10.10.10.11\nAA-BB-CC-00-02-01\t10.10.20.22\n#  ‘#’로 시작하는 라인은 주석으로 무시됩니다'}
       />
     </details>
@@ -448,14 +449,19 @@ interface StatBadgeProps {
   label: string;
   value?: number;
   valueLabel?: string;
+  accent?: boolean;
 }
 
-function StatBadge({ icon, label, value, valueLabel }: StatBadgeProps) {
+function StatBadge({ icon, label, value, valueLabel, accent }: StatBadgeProps) {
+  const tone = accent
+    ? 'bg-blue-500/10 text-blue-300 border-blue-500/30'
+    : 'bg-slate-800 text-slate-200 border-slate-700';
+  const valueTone = accent ? 'text-blue-200' : 'text-slate-100';
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 border rounded text-xs ${tone}`}>
       {icon}
       <span className="font-medium">{label}</span>
-      <span className="font-mono text-blue-900">{valueLabel ?? value}</span>
+      <span className={`font-mono ${valueTone}`}>{valueLabel ?? value}</span>
     </span>
   );
 }
@@ -467,23 +473,23 @@ interface ResultTableProps {
 function ResultTable({ rows }: ResultTableProps) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-blue-300 p-10 text-center text-sm text-blue-500">
+      <div className="rounded-lg border border-dashed border-slate-700 p-10 text-center text-sm text-slate-400">
         변환할 데이터가 없습니다. 입력 영역을 채운 뒤 [변환] 버튼을 누르세요.
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border border-blue-200 bg-white overflow-hidden">
+    <div className="rounded-lg border border-slate-700 bg-slate-900 overflow-hidden">
       <div className="max-h-[600px] overflow-auto">
         <table className="w-full text-sm">
-          <thead className="bg-blue-100 sticky top-0 z-10">
+          <thead className="bg-slate-800 sticky top-0 z-10">
             <tr>
               {COLUMNS.map((c) => (
                 <th
                   key={c}
                   scope="col"
-                  className="text-left font-semibold text-blue-900 px-3 py-2 border-b border-blue-200 whitespace-nowrap"
+                  className="text-left font-semibold text-slate-200 px-3 py-2 border-b border-slate-700 whitespace-nowrap"
                 >
                   {c}
                 </th>
@@ -493,17 +499,17 @@ function ResultTable({ rows }: ResultTableProps) {
           <tbody>
             {rows.map((row, idx) => {
               const isContinuation = row.port === CONTINUATION_PLACEHOLDER;
-              const cellMuted = isContinuation ? 'text-slate-400' : 'text-slate-700';
-              const portColor = isContinuation ? 'text-slate-400' : 'text-blue-900';
+              const cellMuted = isContinuation ? 'text-slate-500' : 'text-slate-300';
+              const portColor = isContinuation ? 'text-slate-500' : 'text-blue-300';
               return (
                 <tr
                   key={idx}
-                  className={isContinuation ? 'bg-blue-50/40' : 'border-t border-blue-100 hover:bg-blue-50/30'}
+                  className={isContinuation ? 'bg-slate-800/30' : 'border-t border-slate-800 hover:bg-slate-800/50'}
                 >
                   <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${portColor}`}>{row.port}</td>
                   <td className="px-3 py-1.5 whitespace-nowrap">
                     {isContinuation ? (
-                      <span className="font-mono text-slate-400">{row.status}</span>
+                      <span className="font-mono text-slate-500">{row.status}</span>
                     ) : (
                       <StatusCell value={row.status} />
                     )}
@@ -512,8 +518,8 @@ function ResultTable({ rows }: ResultTableProps) {
                   <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.duplex}</td>
                   <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.speed}</td>
                   <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${cellMuted}`}>{row.type}</td>
-                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.mac}</td>
-                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.ip}</td>
+                  <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${isContinuation ? 'text-slate-500' : 'text-blue-300'}`}>{row.mac}</td>
+                  <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${isContinuation ? 'text-slate-500' : 'text-blue-300'}`}>{row.ip}</td>
                 </tr>
               );
             })}
@@ -528,8 +534,8 @@ function StatusCell({ value }: { value: string }) {
   if (!value) return <span></span>;
   const v = value.toLowerCase();
   let color = 'text-slate-500';
-  if (v.includes('connected') && !v.includes('not')) color = 'text-emerald-600';
-  else if (v.includes('notconnect')) color = 'text-slate-400';
-  else if (v.includes('disabled') || v.includes('err')) color = 'text-rose-600';
+  if (v.includes('connected') && !v.includes('not')) color = 'text-emerald-400';
+  else if (v.includes('notconnect')) color = 'text-slate-500';
+  else if (v.includes('disabled') || v.includes('err')) color = 'text-rose-400';
   return <span className={`font-mono ${color}`}>{value}</span>;
 }

@@ -2,12 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  color-scheme: dark;
+}
+
 html, body, #root {
   height: 100%;
 }
 
 body {
   margin: 0;
-  background-color: #eff6ff; /* blue-50 */
-  color: #0f172a;
+  background-color: #020617; /* slate-950 */
+  color: #f1f5f9; /* slate-100 */
 }
