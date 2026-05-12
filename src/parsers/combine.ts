@@ -2,6 +2,13 @@ import type { CombineResult, ResultRow } from './types';
 import { parseInterfaceStatus } from './interfaceStatus';
 import { parseMacAddressTable } from './macAddressTable';
 
+// B-02: Placeholder character used in continuation rows (2nd+ MAC of the same
+// port). Filling the leading 6 columns instead of leaving them empty prevents
+// Excel for Microsoft 365 (Korean locale) with "연속 구분 기호를 하나로 처리"
+// from collapsing 6 consecutive tabs and shifting the MAC into column 2.
+// Per docs/improvement-plan-v0.3.md §3.4, the character is `-` (operator-confirmed).
+export const CONTINUATION_PLACEHOLDER = '-';
+
 export function combine(intStatusText: string, macTableText: string): CombineResult {
   const intResult = parseInterfaceStatus(intStatusText);
   const macResult = parseMacAddressTable(macTableText);
@@ -43,12 +50,12 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
           });
         } else {
           rows.push({
-            port: '',
-            status: '',
-            vlan: '',
-            duplex: '',
-            speed: '',
-            type: '',
+            port: CONTINUATION_PLACEHOLDER,
+            status: CONTINUATION_PLACEHOLDER,
+            vlan: CONTINUATION_PLACEHOLDER,
+            duplex: CONTINUATION_PLACEHOLDER,
+            speed: CONTINUATION_PLACEHOLDER,
+            type: CONTINUATION_PLACEHOLDER,
             mac,
           });
         }

@@ -9,7 +9,7 @@ import {
   AlertTriangle,
   Wand2,
 } from 'lucide-react';
-import { combine, rowsToTSV } from './parsers';
+import { combine, rowsToTSV, CONTINUATION_PLACEHOLDER } from './parsers';
 import type { CombineResult } from './parsers';
 import { SAMPLE_INT_STATUS, SAMPLE_MAC_TABLE } from './sampleData';
 
@@ -253,20 +253,27 @@ function ResultTable({ rows }: ResultTableProps) {
           </thead>
           <tbody>
             {rows.map((row, idx) => {
-              const isContinuation = row.port === '';
+              // B-02: continuation rows fill the leading 6 cells with `-`.
+              // Render them in muted gray so operators can still visually
+              // recognise the row as a continuation.
+              const isContinuation = row.port === CONTINUATION_PLACEHOLDER;
+              const cellMuted = isContinuation ? 'text-slate-400' : 'text-slate-700';
+              const portColor = isContinuation ? 'text-slate-400' : 'text-blue-900';
               return (
                 <tr
                   key={idx}
                   className={isContinuation ? 'bg-blue-50/40' : 'border-t border-blue-100 hover:bg-blue-50/30'}
                 >
-                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.port}</td>
-                  <td className="px-3 py-1.5 text-slate-700 whitespace-nowrap">
-                    <StatusCell value={row.status} />
+                  <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${portColor}`}>{row.port}</td>
+                  <td className="px-3 py-1.5 whitespace-nowrap">
+                    {isContinuation
+                      ? <span className="font-mono text-slate-400">{row.status}</span>
+                      : <StatusCell value={row.status} />}
                   </td>
-                  <td className="px-3 py-1.5 font-mono text-slate-700">{row.vlan}</td>
-                  <td className="px-3 py-1.5 font-mono text-slate-700">{row.duplex}</td>
-                  <td className="px-3 py-1.5 font-mono text-slate-700">{row.speed}</td>
-                  <td className="px-3 py-1.5 font-mono text-slate-700 whitespace-nowrap">{row.type}</td>
+                  <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.vlan}</td>
+                  <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.duplex}</td>
+                  <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.speed}</td>
+                  <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${cellMuted}`}>{row.type}</td>
                   <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.mac}</td>
                 </tr>
               );
