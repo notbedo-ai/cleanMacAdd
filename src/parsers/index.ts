@@ -5,3 +5,6 @@ export { parseMacAddressTable } from './macAddressTable';
 export { combine, rowsToTSV, CONTINUATION_PLACEHOLDER } from './combine';
 export { splitCombinedInput } from './splitCombinedInput';
 export type { SplitResult } from './splitCombinedInput';
+export { normalizeMac } from './normalizeMac';
+export { parseMacIpMapping } from './macIpMapping';
+export type { MacIpParseResult } from './macIpMapping';

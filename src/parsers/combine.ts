@@ -1,4 +1,4 @@
-import type { CombineResult, ResultRow } from './types';
+import type { CombineOptions, CombineResult, ResultRow } from './types';
 import { parseInterfaceStatus } from './interfaceStatus';
 import { parseMacAddressTable } from './macAddressTable';
 
@@ -9,9 +9,14 @@ import { parseMacAddressTable } from './macAddressTable';
 // Per docs/improvement-plan-v0.3.md §3.4, the character is `-` (operator-confirmed).
 export const CONTINUATION_PLACEHOLDER = '-';
 
-export function combine(intStatusText: string, macTableText: string): CombineResult {
+export function combine(
+  intStatusText: string,
+  macTableText: string,
+  options: CombineOptions = {},
+): CombineResult {
   const intResult = parseInterfaceStatus(intStatusText);
   const macResult = parseMacAddressTable(macTableText);
+  const macIpMap = options.macIpMap;
 
   const macsByPort = new Map<string, string[]>();
   for (const entry of macResult.entries) {
@@ -23,6 +28,17 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
 
   const rows: ResultRow[] = [];
   let macCount = 0;
+  let ipMappedCount = 0;
+  const seenMacs = new Set<string>();
+
+  // F-08: lookup helper. macAddressTable parser already lowercases MACs into
+  // the dotted canonical form, so a direct map.get is enough.
+  const lookupIp = (mac: string): string => {
+    if (!macIpMap || !mac) return '';
+    const ip = macIpMap.get(mac) ?? '';
+    if (ip) ipMappedCount++;
+    return ip;
+  };
 
   for (const intRow of intResult.rows) {
     const macs = macsByPort.get(intRow.port) ?? [];
@@ -35,9 +51,12 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
         speed: intRow.speed,
         type: intRow.type,
         mac: '',
+        ip: '',
       });
     } else {
       macs.forEach((mac, idx) => {
+        seenMacs.add(mac);
+        const ip = lookupIp(mac);
         if (idx === 0) {
           rows.push({
             port: intRow.port,
@@ -47,6 +66,7 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
             speed: intRow.speed,
             type: intRow.type,
             mac,
+            ip,
           });
         } else {
           rows.push({
@@ -57,6 +77,7 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
             speed: CONTINUATION_PLACEHOLDER,
             type: CONTINUATION_PLACEHOLDER,
             mac,
+            ip,
           });
         }
         macCount++;
@@ -92,6 +113,21 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
     );
   }
 
+  // F-08: surface mapping entries that never matched any MAC in the result.
+  // Keeps operators aware of stale or wrong-switch mapping data.
+  const ipMapSize = macIpMap ? macIpMap.size : 0;
+  if (macIpMap && macIpMap.size > 0) {
+    let unusedCount = 0;
+    for (const mac of macIpMap.keys()) {
+      if (!seenMacs.has(mac)) unusedCount++;
+    }
+    if (unusedCount > 0) {
+      warnings.push(
+        `MAC↔IP 매핑 중 결과에 사용되지 않은 항목 ${unusedCount}건이 있습니다. (다른 스위치의 매핑이거나 누락된 포트 가능성)`,
+      );
+    }
+  }
+
   return {
     rows,
     stats: {
@@ -100,13 +136,16 @@ export function combine(intStatusText: string, macTableText: string): CombineRes
       rowCount: rows.length,
       intStatusSkipped: intResult.skipped,
       macTableSkipped: macResult.skipped,
+      ipMappedCount,
+      ipMapSize,
     },
     warnings,
   };
 }
 
 export function rowsToTSV(rows: ResultRow[]): string {
+  // F-08: 8 columns — Port, Status, Vlan, Duplex, Speed, Type, MAC, IP.
   return rows
-    .map((r) => [r.port, r.status, r.vlan, r.duplex, r.speed, r.type, r.mac].join('\t'))
+    .map((r) => [r.port, r.status, r.vlan, r.duplex, r.speed, r.type, r.mac, r.ip].join('\t'))
     .join('\n');
 }

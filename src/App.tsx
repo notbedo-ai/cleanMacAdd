@@ -11,23 +11,34 @@ import {
   Layers,
   Columns2,
   ChevronRight,
+  Link2,
 } from 'lucide-react';
 import {
   combine,
   rowsToTSV,
   CONTINUATION_PLACEHOLDER,
   splitCombinedInput,
+  parseMacIpMapping,
 } from './parsers';
 import type { CombineResult } from './parsers';
-import { SAMPLE_INT_STATUS, SAMPLE_MAC_TABLE } from './sampleData';
+import { SAMPLE_INT_STATUS, SAMPLE_MAC_TABLE, SAMPLE_MAC_IP } from './sampleData';
 
-const COLUMNS = ['Port', 'Status', 'Vlan', 'Duplex', 'Speed', 'Type', 'MAC'] as const;
+// F-08: result table is now 8 columns including IP.
+const COLUMNS = ['Port', 'Status', 'Vlan', 'Duplex', 'Speed', 'Type', 'MAC', 'IP'] as const;
 
 type InputMode = 'combined' | 'split';
 
 const initialResult: CombineResult = {
   rows: [],
-  stats: { portCount: 0, macCount: 0, rowCount: 0, intStatusSkipped: 0, macTableSkipped: 0 },
+  stats: {
+    portCount: 0,
+    macCount: 0,
+    rowCount: 0,
+    intStatusSkipped: 0,
+    macTableSkipped: 0,
+    ipMappedCount: 0,
+    ipMapSize: 0,
+  },
   warnings: [],
 };
 
@@ -38,6 +49,7 @@ export function App() {
   const [combinedText, setCombinedText] = useState('');
   const [intStatus, setIntStatus] = useState('');
   const [macTable, setMacTable] = useState('');
+  const [macIpText, setMacIpText] = useState('');
   const [result, setResult] = useState<CombineResult>(initialResult);
   const [copied, setCopied] = useState(false);
   const [converted, setConverted] = useState(false);
@@ -49,10 +61,11 @@ export function App() {
   const combinedSplit = useMemo(() => splitCombinedInput(combinedText), [combinedText]);
 
   const handleConvert = () => {
+    const mapping = parseMacIpMapping(macIpText);
     let cr: CombineResult;
     if (inputMode === 'combined') {
       const split = splitCombinedInput(combinedText);
-      cr = combine(split.intStatus, split.macTable);
+      cr = combine(split.intStatus, split.macTable, { macIpMap: mapping.map });
       if (combinedText.trim().length > 0 && !split.splitFound) {
         cr = {
           ...cr,
@@ -62,13 +75,25 @@ export function App() {
           ],
         };
       }
-      // Reflect the split into the split-mode textareas so the operator can
-      // toggle to split mode and inspect/edit if needed.
       setIntStatus(split.intStatus);
       setMacTable(split.macTable);
     } else {
-      cr = combine(intStatus, macTable);
+      cr = combine(intStatus, macTable, { macIpMap: mapping.map });
     }
+
+    // F-08: surface mapping parse issues alongside the combine warnings.
+    const extra: string[] = [];
+    if (mapping.skipped > 0) {
+      extra.push(`MAC↔IP 매핑 ${mapping.skipped}건은 MAC 형식 오류로 스킵되었습니다.`);
+    }
+    if (mapping.duplicates.length > 0) {
+      const sample = mapping.duplicates.slice(0, 3).join(', ');
+      extra.push(
+        `MAC↔IP 매핑 중복 ${mapping.duplicates.length}건 — 마지막 값을 사용합니다. (예: ${sample}${mapping.duplicates.length > 3 ? ' ...' : ''})`,
+      );
+    }
+    if (extra.length > 0) cr = { ...cr, warnings: [...cr.warnings, ...extra] };
+
     setResult(cr);
     setConverted(true);
     setCopied(false);
@@ -102,6 +127,7 @@ export function App() {
     setCombinedText('');
     setIntStatus('');
     setMacTable('');
+    setMacIpText('');
     setResult(initialResult);
     setConverted(false);
     setCopied(false);
@@ -114,6 +140,7 @@ export function App() {
       setIntStatus(SAMPLE_INT_STATUS);
       setMacTable(SAMPLE_MAC_TABLE);
     }
+    setMacIpText(SAMPLE_MAC_IP);
     setConverted(false);
   };
 
@@ -130,7 +157,7 @@ export function App() {
             <h1 className="text-xl font-semibold text-blue-900">cleanMac</h1>
             <p className="text-sm text-blue-700/80">
               Cisco IOS · <span className="font-mono">sh int status</span> +{' '}
-              <span className="font-mono">sh mac add</span> → Excel 붙여넣기용 표
+              <span className="font-mono">sh mac add</span> → Excel 붙여넣기용 표 (IP 매핑 지원)
             </p>
           </div>
           <div className="ml-auto">
@@ -173,6 +200,8 @@ export function App() {
           </div>
         )}
 
+        <MacIpMappingPanel value={macIpText} onChange={setMacIpText} />
+
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -187,7 +216,7 @@ export function App() {
             onClick={handleCopy}
             disabled={!canCopy}
             className="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-            title="결과를 TSV(헤더 없음)로 클립보드에 복사 → Excel에 바로 붙여넣기"
+            title="결과를 TSV(헤더 없음, 8컬럼)로 클립보드에 복사 → Excel에 바로 붙여넣기"
           >
             {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <ClipboardCopy className="w-4 h-4" />}
             {copied ? '복사됨' : '클립보드 복사'}
@@ -202,10 +231,17 @@ export function App() {
           </button>
 
           {converted && (
-            <div className="ml-auto flex items-center gap-3 text-sm text-blue-700">
+            <div className="ml-auto flex flex-wrap items-center gap-3 text-sm text-blue-700">
               <StatBadge icon={<FileText className="w-3.5 h-3.5" />} label="포트" value={result.stats.portCount} />
               <StatBadge label="MAC" value={result.stats.macCount} />
               <StatBadge label="행" value={result.stats.rowCount} />
+              {result.stats.macCount > 0 && (
+                <StatBadge
+                  icon={<Link2 className="w-3.5 h-3.5" />}
+                  label="IP 매핑"
+                  valueLabel={`${result.stats.ipMappedCount}/${result.stats.macCount}`}
+                />
+              )}
             </div>
           )}
         </div>
@@ -225,7 +261,7 @@ export function App() {
       </main>
 
       <footer className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-xs text-blue-400">
-        입력 데이터는 외부로 전송되지 않으며 브라우저 안에서만 처리됩니다.
+        MAC·IP 매핑을 포함한 모든 입력은 외부로 전송되지 않으며 브라우저 안에서만 처리됩니다.
       </footer>
     </div>
   );
@@ -341,7 +377,7 @@ function PreviewBlock({ title, lines }: { title: string; lines: string[] }) {
   return (
     <details className="rounded border border-blue-200 bg-white open:bg-blue-50/30">
       <summary className="px-2 py-1 text-blue-800 font-medium cursor-pointer select-none flex items-center gap-1 [&::-webkit-details-marker]:hidden">
-        <ChevronRight className="w-3 h-3 transition-transform group-open:rotate-90" />
+        <ChevronRight className="w-3 h-3" />
         {title}
       </summary>
       <pre className="px-3 pb-2 pt-1 text-[11px] font-mono text-slate-700 overflow-x-auto whitespace-pre">
@@ -376,18 +412,50 @@ function InputPanel({ label, hint, value, onChange }: InputPanelProps) {
   );
 }
 
+interface MacIpMappingPanelProps {
+  value: string;
+  onChange: (v: string) => void;
+}
+
+// F-08: dedicated optional input for the MAC↔IP mapping. Collapsible
+// (defaults to open per docs §5.6) so it stays out of the way on screens
+// where the operator does not have IP information available.
+function MacIpMappingPanel({ value, onChange }: MacIpMappingPanelProps) {
+  return (
+    <details className="rounded-lg border border-blue-200 bg-white overflow-hidden" open>
+      <summary className="px-4 py-2.5 border-b border-blue-200 bg-blue-50 cursor-pointer select-none [&::-webkit-details-marker]:hidden">
+        <div className="flex items-center gap-2">
+          <Link2 className="w-4 h-4 text-blue-700" />
+          <div className="text-sm font-medium text-blue-900">③ MAC↔IP 매핑 (선택)</div>
+        </div>
+        <div className="text-xs text-blue-700/80 mt-0.5">
+          타 팀에서 받은 MAC ↔ IP 매핑(Excel 두 열)을 그대로 붙여넣으세요. 결과 표에 IP 컬럼이 채워집니다. 비워두면 IP 컬럼은 빈 값으로 출력됩니다.
+        </div>
+      </summary>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        spellCheck={false}
+        className="w-full h-40 p-3 text-xs font-mono resize-y outline-none focus:bg-blue-50/40 focus:ring-2 focus:ring-inset focus:ring-blue-500"
+        placeholder={'aabb.cc00.0100\t10.10.10.11\nAA-BB-CC-00-02-01\t10.10.20.22\n#  ‘#’로 시작하는 라인은 주석으로 무시됩니다'}
+      />
+    </details>
+  );
+}
+
 interface StatBadgeProps {
   icon?: React.ReactNode;
   label: string;
-  value: number;
+  value?: number;
+  valueLabel?: string;
 }
 
-function StatBadge({ icon, label, value }: StatBadgeProps) {
+function StatBadge({ icon, label, value, valueLabel }: StatBadgeProps) {
   return (
     <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
       {icon}
       <span className="font-medium">{label}</span>
-      <span className="font-mono text-blue-900">{value}</span>
+      <span className="font-mono text-blue-900">{valueLabel ?? value}</span>
     </span>
   );
 }
@@ -414,6 +482,7 @@ function ResultTable({ rows }: ResultTableProps) {
               {COLUMNS.map((c) => (
                 <th
                   key={c}
+                  scope="col"
                   className="text-left font-semibold text-blue-900 px-3 py-2 border-b border-blue-200 whitespace-nowrap"
                 >
                   {c}
@@ -444,6 +513,7 @@ function ResultTable({ rows }: ResultTableProps) {
                   <td className={`px-3 py-1.5 font-mono ${cellMuted}`}>{row.speed}</td>
                   <td className={`px-3 py-1.5 font-mono whitespace-nowrap ${cellMuted}`}>{row.type}</td>
                   <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.mac}</td>
+                  <td className="px-3 py-1.5 font-mono text-blue-900 whitespace-nowrap">{row.ip}</td>
                 </tr>
               );
             })}
