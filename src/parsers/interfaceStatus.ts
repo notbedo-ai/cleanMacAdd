@@ -32,7 +32,13 @@ function isSeparator(line: string): boolean {
 }
 
 export function parseInterfaceStatus(text: string): { rows: InterfaceStatusRow[]; skipped: number } {
-  const lines = text.split(/\r?\n/);
+  // B-01: SecureCRT/PuTTY may collapse runs of spaces into a single TAB on
+  // clipboard. That makes data lines shorter than the header and lets adjacent
+  // column content leak into Speed (e.g. `a-1000` → `a` + `-1000` two cells in
+  // Excel). Normalize tabs to two spaces before computing header positions so
+  // the fixed-width substring approach stays aligned.
+  const normalized = text.replace(/\t/g, '  ');
+  const lines = normalized.split(/\r?\n/);
   const rows: InterfaceStatusRow[] = [];
   let skipped = 0;
 
@@ -55,7 +61,14 @@ export function parseInterfaceStatus(text: string): { rows: InterfaceStatusRow[]
     if (!col) return '';
     const end = Math.min(col.end, line.length);
     if (col.start >= line.length) return '';
-    return line.substring(col.start, end).trim();
+    const raw = line.substring(col.start, end).trim();
+    // B-01: Name is the only column that legitimately contains internal
+    // whitespace. Every other column (Status / Vlan / Duplex / Speed / Type)
+    // is a single token — collapse to the first whitespace-separated token
+    // to drop any leakage from boundary drift.
+    if (name === 'Name') return raw;
+    if (!raw) return '';
+    return raw.split(/\s+/)[0] ?? '';
   };
 
   for (let i = headerIdx + 1; i < lines.length; i++) {
