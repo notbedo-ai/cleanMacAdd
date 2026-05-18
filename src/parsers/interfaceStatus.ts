@@ -16,11 +16,25 @@ function detectColumns(headerLine: string): Column[] {
     .filter((p) => p.start >= 0)
     .sort((a, b) => a.start - b.start);
 
-  return positions.map((p, idx) => ({
-    name: p.name,
-    start: p.start,
-    end: idx + 1 < positions.length ? positions[idx + 1].start : Number.MAX_SAFE_INTEGER,
-  }));
+  return positions.map((p, idx) => {
+    // B-03: Cisco IOS prints the Speed column right-aligned to the header
+    // keyword "Speed" (5 chars). Values longer than 5 chars (e.g. `a-1000`)
+    // start one column to the LEFT of the keyword's 'S', so using
+    // indexOf('Speed') as the column's left edge drops the leading 'a' and
+    // yields `-1000` — which Excel then interprets as the number -1000.
+    // Extend Speed's start back to the previous keyword's right edge + 1.
+    let start = p.start;
+    if (p.name === 'Speed' && idx > 0) {
+      const prev = positions[idx - 1];
+      const prevKeywordEnd = prev.start + prev.name.length;
+      start = Math.min(p.start, prevKeywordEnd + 1);
+    }
+    return {
+      name: p.name,
+      start,
+      end: idx + 1 < positions.length ? positions[idx + 1].start : Number.MAX_SAFE_INTEGER,
+    };
+  });
 }
 
 function isHeaderLine(line: string): boolean {
