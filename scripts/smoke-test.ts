@@ -92,6 +92,27 @@ const expectations: Array<[boolean, string]> = [
   [split.splitFound, 'C2960 combined paste split successfully'],
   [c2960.stats.portCount === 26, 'C2960 → 26 status rows (Fa0/1..24 + Gi0/1..2)'],
   [c2960.stats.macCount === 20, 'C2960 → 20 learned MACs after operator filter'],
+  // B-03: Cisco IOS prints Speed right-aligned to the header keyword "Speed".
+  // Values longer than 5 chars (e.g. `a-1000`) start one column to the LEFT
+  // of the header's 'S'. The substring-by-header-index approach must not drop
+  // that first 'a' — otherwise Excel interprets the cell as the negative
+  // number -1000.
+  [
+    c2960.rows.find((r) => r.port === 'Gi0/1')?.speed === 'a-1000',
+    'C2960 Gi0/1 speed === "a-1000" (right-aligned 6-char value)',
+  ],
+  [
+    c2960.rows.find((r) => r.port === 'Gi0/2')?.speed === 'a-1000',
+    'C2960 Gi0/2 speed === "a-1000" (right-aligned 6-char value)',
+  ],
+  [
+    c2960.rows.find((r) => r.port === 'Fa0/1')?.speed === 'a-100',
+    'C2960 Fa0/1 speed === "a-100" (5-char value regression guard)',
+  ],
+  [
+    c2960.rows.find((r) => r.port === 'Fa0/8')?.speed === 'auto',
+    'C2960 Fa0/8 speed === "auto" (4-char value regression guard)',
+  ],
 ];
 
 console.log('\n=== checks ===');
